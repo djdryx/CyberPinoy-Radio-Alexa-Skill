@@ -1,0 +1,38 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "CyberPinoy Radio",
+          "summary": "Listen to CyberPinoy Radio live.",
+          "description": "Enjoy live Filipino music and programs from CyberPinoy Radio. Pusong Pinoy, Purong Pinoy!",
+          "examplePhrases": [
+            "Alexa, open Cyber Pinoy Radio",
+            "Alexa, ask Cyber Pinoy Radio to play"
+          ],
+          "keywords": [
+            "radio",
+            "Filipino",
+            "OPM",
+            "music"
+          ]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "distributionCountries": [
+        "US"
+      ]
+    },
+    "apis": {
+      "custom": {}
+    },
+    "manifestVersion": "1.0",
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false
+    }
+  }
+}
