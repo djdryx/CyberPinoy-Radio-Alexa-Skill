@@ -2,7 +2,8 @@
 const Alexa = require('ask-sdk-core');
 const STREAM = 'https://a6.asurahosting.com/listen/cyberpinoy_radio/radio.mp3';
 const TOKEN = 'cyberpinoy-radio-live';
-const play = h => h.responseBuilder.speak('Playing CyberPinoy Radio. Pusong Pinoy, Purong Pinoy!').addAudioPlayerPlayDirective('REPLACE_ALL', STREAM, TOKEN, 0).getResponse();
+// AudioPlayer.Play responses must not combine a spoken response with the stream directive.
+const play = h => h.responseBuilder.addAudioPlayerPlayDirective('REPLACE_ALL', STREAM, TOKEN, 0).withShouldEndSession(true).getResponse();
 const Launch = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='LaunchRequest',handle:play};
 const Play = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['PlayRadioIntent','AMAZON.ResumeIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:play};
 const Stop = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['AMAZON.StopIntent','AMAZON.CancelIntent','AMAZON.PauseIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:h=>h.responseBuilder.addAudioPlayerStopDirective().getResponse()};
