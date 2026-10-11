@@ -1,14 +1,69 @@
 'use strict';
-const Alexa = require('ask-sdk-core');
-const STREAM = 'https://a6.asurahosting.com/listen/cyberpinoy_radio/radio.mp3';
+
+// CyberPinoy Radio Alexa Skill — direct Lambda response, no external SDK.
+const STREAM_URL = 'https://a6.asurahosting.com/listen/cyberpinoy_radio/radio.mp3';
 const TOKEN = 'cyberpinoy-radio-live';
-// AudioPlayer.Play responses must not combine a spoken response with the stream directive.
-const play = h => h.responseBuilder.addAudioPlayerPlayDirective('REPLACE_ALL', STREAM, TOKEN, 0).withShouldEndSession(true).getResponse();
-const Launch = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='LaunchRequest',handle:play};
-const Play = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['PlayRadioIntent','AMAZON.ResumeIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:play};
-const Stop = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['AMAZON.StopIntent','AMAZON.CancelIntent','AMAZON.PauseIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:h=>h.responseBuilder.addAudioPlayerStopDirective().getResponse()};
-const Help = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && Alexa.getIntentName(h.requestEnvelope)==='AMAZON.HelpIntent',handle:h=>h.responseBuilder.speak('Say play to listen to CyberPinoy Radio.').reprompt('Say play to listen.').getResponse()};
-const AudioEvents = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope).startsWith('AudioPlayer.'),handle:h=>h.responseBuilder.getResponse()};
-const Fallback = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest',handle:h=>h.responseBuilder.speak('Say play to listen to CyberPinoy Radio.').reprompt('Say play.').getResponse()};
-const Errors = {canHandle:()=>true,handle:(h,e)=>{console.error(e);return h.responseBuilder.speak('Sorry, the radio is unavailable right now. Please try again later.').getResponse()}};
-exports.handler=Alexa.SkillBuilders.custom().addRequestHandlers(Launch,Play,Stop,Help,AudioEvents,Fallback).addErrorHandlers(Errors).lambda();
+
+exports.handler = async (event) => {
+  const request = event.request || {};
+  const type = request.type;
+  const intent = request.intent && request.intent.name;
+  console.log('CyberPinoy request', type, intent || '');
+
+  if (type === 'LaunchRequest' ||
+      (type === 'IntentRequest' && ['PlayRadioIntent', 'AMAZON.ResumeIntent'].includes(intent))) {
+    return {
+      version: '1.0',
+      response: {
+        directives: [{
+          type: 'AudioPlayer.Play',
+          playBehavior: 'REPLACE_ALL',
+          audioItem: {
+            stream: {
+              url: STREAM_URL,
+              token: TOKEN,
+              offsetInMilliseconds: 0
+            }
+          }
+        }],
+        shouldEndSession: true
+      }
+    };
+  }
+
+  if (type === 'IntentRequest' &&
+      ['AMAZON.StopIntent', 'AMAZON.CancelIntent', 'AMAZON.PauseIntent'].includes(intent)) {
+    return {
+      version: '1.0',
+      response: {
+        directives: [{ type: 'AudioPlayer.Stop' }],
+        shouldEndSession: true
+      }
+    };
+  }
+
+  if (type === 'AudioPlayer.PlaybackFailed') {
+    console.error('Audio playback failed:', JSON.stringify(request.error || {}));
+  }
+
+  if (type && type.startsWith('AudioPlayer.')) {
+    return { version: '1.0', response: {} };
+  }
+
+  return {
+    version: '1.0',
+    response: {
+      outputSpeech: {
+        type: 'PlainText',
+        text: 'Welcome to Cyber Pinoy Radio. Say play to listen live.'
+      },
+      shouldEndSession: false,
+      reprompt: {
+        outputSpeech: {
+          type: 'PlainText',
+          text: 'Say play to listen live.'
+        }
+      }
+    }
+  };
+};
