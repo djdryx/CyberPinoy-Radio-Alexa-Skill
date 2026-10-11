@@ -1,0 +1,13 @@
+'use strict';
+const Alexa = require('ask-sdk-core');
+const STREAM = 'https://a6.asurahosting.com/listen/cyberpinoy_radio/radio.mp3';
+const TOKEN = 'cyberpinoy-radio-live';
+const play = h => h.responseBuilder.speak('Playing CyberPinoy Radio. Pusong Pinoy, Purong Pinoy!').addAudioPlayerPlayDirective('REPLACE_ALL', STREAM, TOKEN, 0).getResponse();
+const Launch = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='LaunchRequest',handle:play};
+const Play = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['PlayRadioIntent','AMAZON.ResumeIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:play};
+const Stop = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && ['AMAZON.StopIntent','AMAZON.CancelIntent','AMAZON.PauseIntent'].includes(Alexa.getIntentName(h.requestEnvelope)),handle:h=>h.responseBuilder.addAudioPlayerStopDirective().getResponse()};
+const Help = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest' && Alexa.getIntentName(h.requestEnvelope)==='AMAZON.HelpIntent',handle:h=>h.responseBuilder.speak('Say play to listen to CyberPinoy Radio.').reprompt('Say play to listen.').getResponse()};
+const AudioEvents = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope).startsWith('AudioPlayer.'),handle:h=>h.responseBuilder.getResponse()};
+const Fallback = {canHandle:h=>Alexa.getRequestType(h.requestEnvelope)==='IntentRequest',handle:h=>h.responseBuilder.speak('Say play to listen to CyberPinoy Radio.').reprompt('Say play.').getResponse()};
+const Errors = {canHandle:()=>true,handle:(h,e)=>{console.error(e);return h.responseBuilder.speak('Sorry, the radio is unavailable right now. Please try again later.').getResponse()}};
+exports.handler=Alexa.SkillBuilders.custom().addRequestHandlers(Launch,Play,Stop,Help,AudioEvents,Fallback).addErrorHandlers(Errors).lambda();
