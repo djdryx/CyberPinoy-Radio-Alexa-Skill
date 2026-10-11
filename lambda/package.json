@@ -1,0 +1,10 @@
+{
+  "name": "cyberpinoy-radio-alexa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CyberPinoy Radio Alexa live streaming skill",
+  "main": "index.js",
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0"
+  }
+}
